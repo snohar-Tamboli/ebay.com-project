@@ -1,1 +1,28 @@
+import io.restassured.RestAssured;
+import io.restassured.response.Response;
+import org.junit.jupiter.api.Test;
+import static org.junit.jupiter.api.Assertions.*;
 
+public class CoinDeskApiTest {
+
+    private static final String API_URL = "https://api.coindesk.com/v1/bpi/currentprice.json";
+
+    @Test
+    public void testBPIEndpoint() {
+        // Step 1: Send GET request to the CoinDesk API
+        Response response = RestAssured.get(API_URL);
+
+        // Step 2: Verify the response status code is 200 (OK)
+        assertEquals(200, response.getStatusCode(), "Status code should be 200 OK");
+
+        // Step 3: Parse the response JSON and validate the BPIs
+        // Check if the BPI object contains USD, GBP, EUR
+        assertTrue(response.jsonPath().get("bpi.USD") != null, "USD should be present in the BPI response");
+        assertTrue(response.jsonPath().get("bpi.GBP") != null, "GBP should be present in the BPI response");
+        assertTrue(response.jsonPath().get("bpi.EUR") != null, "EUR should be present in the BPI response");
+
+        // Step 4: Verify the GBP 'description' equals "British Pound Sterling"
+        String gbpDescription = response.jsonPath().getString("bpi.GBP.description");
+        assertEquals("British Pound Sterling", gbpDescription, "The description for GBP should be 'British Pound Sterling'");
+    }
+}
